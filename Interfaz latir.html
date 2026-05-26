@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LATIR — Apoyo Transparente para Pacientes Hospitalizados</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Botones de Auth en Navbar ── */
+    .nav-auth-btns {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: 20px;
+    }
+    .btn-nav-login {
+      background: none;
+      border: 1.5px solid rgba(230,57,70,0.4);
+      color: var(--terracota);
+      padding: 7px 18px;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.83rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s;
+      white-space: nowrap;
+    }
+    .btn-nav-login:hover {
+      background: rgba(230,57,70,0.06);
+      border-color: var(--terracota);
+    }
+    .btn-nav-register {
+      background: var(--terracota);
+      border: none;
+      color: #fff;
+      padding: 7px 18px;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.83rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s;
+      white-space: nowrap;
+      box-shadow: 0 2px 12px rgba(230,57,70,0.25);
+    }
+    .btn-nav-register:hover {
+      background: #b91c2e;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 18px rgba(230,57,70,0.35);
+    }
+    /* ── User Session Chip ── */
+    .nav-user-chip {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-left: 16px;
+      position: relative;
+    }
+    .nav-user-chip.visible { display: flex; }
+    .user-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--terracota), #d4a24c);
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.6);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .user-name-btn {
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--brown-dark);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .user-name-btn::after {
+      content: '▾';
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 14px;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.12);
+      min-width: 200px;
+      overflow: hidden;
+      z-index: 2000;
+      animation: fadeDown 0.2s ease;
+    }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .user-dropdown.open { display: block; }
+    .user-dropdown-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .user-dropdown-role {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--terracota);
+      margin-bottom: 2px;
+    }
+    .user-dropdown-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--brown-dark);
+    }
+    .user-dropdown a, .user-dropdown button {
+      display: block;
+      width: 100%;
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      background: none;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .user-dropdown a:hover, .user-dropdown button:hover {
+      background: #f8fafc;
+      color: var(--brown-dark);
+    }
+    .user-dropdown .logout-btn {
+      color: #ef4444;
+      border-top: 1px solid #f1f5f9;
+      margin-top: 4px;
+    }
+    .user-dropdown .logout-btn:hover { background: #fef2f2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <a href="Interfaz latir.html" class="nav-logo" style="text-decoration: none;">
+      <img src="logo.png" alt="LATIR Logo" style="height: 48px; width: auto; mix-blend-mode: multiply;" />
+    </a>
+    <ul class="nav-links">
+      <li><a href="#indice-gravedad">Que Hacemos</a></li>
+      <li><a href="#transparencia">Transparencia</a></li>
+      <li><a href="#pacientes">Pacientes</a></li>
+      <li><a href="solicitud.html" id="navSolicitudLink">Solicitar Apoyo</a></li>
+    </ul>
+
+    <!-- Botones de autenticación (visibles cuando NO hay sesión) -->
+    <div class="nav-auth-btns" id="navAuthBtns">
+      <a href="auth.html?tab=login" class="btn-nav-login" id="btnNavLogin">Iniciar sesión</a>
+      <a href="auth.html" class="btn-nav-register" id="btnNavRegister">Registrarse</a>
+    </div>
+
+    <!-- Chip de usuario (visible cuando SÍ hay sesión) -->
+    <div class="nav-user-chip" id="navUserChip">
+      <div class="user-avatar" id="userAvatar" onclick="toggleUserDropdown()">?</div>
+      <button class="user-name-btn" id="userNameBtn" onclick="toggleUserDropdown()">Mi cuenta</button>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-dropdown-header">
+          <div class="user-dropdown-role" id="dropdownRole">—</div>
+          <div class="user-dropdown-name" id="dropdownName">—</div>
+        </div>
+        <a href="#" id="dropdownDashboard">📊 Mi panel</a>
+        <button class="logout-btn" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+      </div>
+    </div>
+
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+    <div class="hero-content">
+      <p class="hero-tag">Hospital General "Dr. Carlos Canseco" — Ciudad Madero</p>
+      <h1 class="hero-title">
+        Lucha y Apoyo<br />
+        <em>Transparente para</em><br />
+        Pacientes Hospitalizados
+      </h1>
+      <p class="hero-desc">
+        LATIR centraliza, verifica y prioriza las solicitudes de apoyo económico para pacientes en urgencias, garantizando transparencia total en el uso de cada donación.
+      </p>
+      <div class="hero-actions">
+        <button class="btn-primary" id="btnDonarHero">Hacer una donación</button>
+        <a href="#pacientes" class="btn-ghost">Ver pacientes →</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="stat-value"><span class="stat-num" data-target="0">0</span></div>
+          <span class="stat-label">Donantes activos</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="stat-value"><span class="stat-num" data-target="0" data-prefix="$" data-suffix="K">0</span></div>
+          <span class="stat-label">Recaudados este mes</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="stat-value"><span class="stat-num" data-target="100">100</span><span class="stat-unit">%</span></div>
+          <span class="stat-label">Va directo a pacientes</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="hero-visual">
+        <div class="visual-ring ring-1"></div>
+        <div class="visual-ring ring-2"></div>
+        <div class="visual-ring ring-3"></div>
+        <img src="hero-image.png" alt="Cuidado y Esperanza LATIR" class="visual-hero-img" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ÍNDICE DE GRAVEDAD -->
+  <section class="ig-section" id="indice-gravedad">
+    <div class="section-header">
+      <p class="section-tag">Sistema LATIR</p>
+      <h2 class="section-title">Índice de Gravedad (IG)</h2>
+      <p class="ig-subtitle">Priorizamos la entrega de fondos de forma objetiva y equitativa basándonos en criterios clínicos verificables.</p>
+    </div>
+    <div class="ig-criterios">
+      <div class="ig-card">
+        <div class="ig-icon">🏥</div>
+        <h4>Clasificación de Triage</h4>
+        <p>Nivel de urgencia médica asignado por el personal clínico del hospital al momento de ingreso.</p>
+      </div>
+      <div class="ig-card">
+        <div class="ig-icon">📋</div>
+        <h4>Pronóstico Médico</h4>
+        <p>Evaluación del estado de salud actual y proyección del tratamiento necesario por el médico tratante.</p>
+      </div>
+      <div class="ig-card">
+        <div class="ig-icon">👨‍👩‍👧</div>
+        <h4>Vulnerabilidad Económica</h4>
+        <p>Análisis del nivel socioeconómico familiar para garantizar que el apoyo llegue a quienes más lo necesitan.</p>
+      </div>
+      <div class="ig-card">
+        <div class="ig-icon">🔗</div>
+        <h4>Dependencia Familiar</h4>
+        <p>Número de dependientes económicos del paciente para contextualizar el impacto de la situación.</p>
+      </div>
+      <div class="ig-card">
+        <div class="ig-icon">⏱️</div>
+        <h4>Tiempo de Espera</h4>
+        <p>Tiempo transcurrido desde la solicitud de apoyo para evitar que los casos urgentes queden sin atención.</p>
+      </div>
+    </div>
+    <div class="ig-escala">
+      <p class="ig-escala-titulo">Escala del Índice de Gravedad</p>
+      <div class="ig-barras">
+        <div class="ig-barra nivel-1"><span class="nivel-label">IG 1–2</span><span class="nivel-desc">Seguimiento</span></div>
+        <div class="ig-barra nivel-2"><span class="nivel-label">IG 3–4</span><span class="nivel-desc">Moderado</span></div>
+        <div class="ig-barra nivel-3"><span class="nivel-label">IG 5–6</span><span class="nivel-desc">Urgente</span></div>
+        <div class="ig-barra nivel-4"><span class="nivel-label">IG 7–8</span><span class="nivel-desc">Crítico</span></div>
+        <div class="ig-barra nivel-5"><span class="nivel-label">IG 9–10</span><span class="nivel-desc">Emergencia</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PACIENTES EN URGENCIAS -->
+  <section class="causas" id="pacientes">
+    <div class="section-header">
+      <p class="section-tag">Área de Urgencias</p>
+      <h2 class="section-title">Pacientes que necesitan apoyo</h2>
+      <p class="causas-nota">Todos los casos han sido verificados por personal del Hospital "Dr. Carlos Canseco" — Departamento de Urgencias.</p>
+    </div>
+    <div class="causas-grid" id="causasGrid"></div>
+  </section>
+
+
+  <!-- TRANSPARENCIA -->
+  <section class="impacto" id="transparencia">
+    <div class="impacto-inner">
+      <div class="impacto-text">
+        <p class="section-tag">Rendición de cuentas</p>
+        <h2 class="section-title">Transparencia<br /><em>total y verificada</em></h2>
+        <p class="impacto-desc">
+          Cada donación es rastreada y reportada. Garantizamos que los recursos llegan directamente a los pacientes con evidencia documental de cada gasto realizado.
+        </p>
+        <div class="impacto-list">
+          <div class="impacto-item"><span class="impacto-icon">✓</span>Casos verificados por personal médico del hospital</div>
+          <div class="impacto-item"><span class="impacto-icon">✓</span>Reportes detallados del uso de cada donación</div>
+          <div class="impacto-item"><span class="impacto-icon">✓</span>Índice de Gravedad objetivo y auditable</div>
+          <div class="impacto-item"><span class="impacto-icon">✓</span>Notificaciones en tiempo real al donante</div>
+          <div class="impacto-item"><span class="impacto-icon">✓</span>Sin intermediarios — fondos directos al paciente</div>
+        </div>
+      </div>
+      <div class="impacto-metrics">
+        <div class="metric-card accent"><span class="metric-num">$0</span><span class="metric-label">Total recaudado</span></div>
+        <div class="metric-card"><span class="metric-num">0</span><span class="metric-label">Pacientes apoyados</span></div>
+        <div class="metric-card"><span class="metric-num">0</span><span class="metric-label">Casos verificados</span></div>
+        <div class="metric-card light"><span class="metric-num">100%</span><span class="metric-label">Va directo al paciente</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <section class="como" id="como">
+    <div class="section-header">
+      <p class="section-tag">Proceso claro</p>
+      <h2 class="section-title">Cómo funciona LATIR</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-icon">🏥</div>
+        <h3>Registro del caso</h3>
+        <p>El familiar o personal del hospital registra al paciente con información clínica básica verificable.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-icon">📊</div>
+        <h3>Cálculo del IG</h3>
+        <p>El sistema asigna un Índice de Gravedad objetivo basado en los 5 criterios clínicos y socioeconómicos.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-icon">💳</div>
+        <h3>Recepción de donaciones</h3>
+        <p>Los donantes eligen un caso y realizan su aportación de forma segura. Todo queda registrado.</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-icon">📬</div>
+        <h3>Reporte y seguimiento</h3>
+        <p>El donante recibe actualizaciones del caso con evidencia del uso real de los fondos aportados.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-final">
+    <div class="cta-inner">
+      <h2 class="cta-title">¿Listo para apoyar<br /><em>a un paciente?</em></h2>
+      <p class="cta-desc">Sé de los primeros en unirte y transformar vidas en Ciudad Madero con transparencia real.</p>
+      <button class="btn-primary large" id="btnDonarCta">Comenzar a donar</button>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <img src="logo.png" alt="LATIR Logo" style="height: 48px; width: auto; background: rgba(255, 255, 255, 0.9); padding: 4px 10px; border-radius: 8px;" />
+        </div>
+        <p>Lucha y Apoyo Transparente para la Investigación y Recuperación de Pacientes Hospitalizados.</p>
+        <p style="margin-top:8px;font-size:0.75rem;opacity:0.7;">Instituto Tecnológico de Ciudad Madero · ISC</p>
+      </div>
+      <div class="footer-links">
+        <h4>Plataforma</h4>
+        <a href="#pacientes">Casos activos</a>
+        <a href="solicitud.html">Registrar paciente</a>
+        <a href="#indice-gravedad">Indice de Gravedad</a>
+      </div>
+      <div class="footer-links">
+        <h4>Transparencia</h4>
+        <a href="#transparencia">Reportes de uso</a>
+        <a href="#como">Verificacion de casos</a>
+        <a href="mailto:contacto@latir.org">Contacto</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#" onclick="abrirLegal('privacidad'); return false;">Privacidad</a>
+        <a href="#" onclick="abrirLegal('terminos'); return false;">Terminos de uso</a>
+        <a href="#" onclick="abrirLegal('consentimiento'); return false;">Consentimiento</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 LATIR — Proyecto académico · ITCM · Ingeniería en Sistemas Computacionales · Hecho con ♡ para Ciudad Madero.</p>
+    </div>
+  </footer>
+
+
+  <!-- MODAL LISTA DE PACIENTES -->
+  <div class="modal-overlay" id="perfilOverlay">
+    <div class="modal lista-modal" id="perfilModal">
+      <button class="modal-close" id="perfilClose" style="z-index: 100;">✕</button>
+
+      <!-- VISTA: LISTA -->
+      <div id="vistaLista">
+        <div class="modal-header">
+          <span class="modal-icon">🏥</span>
+          <h3>Pacientes en Urgencias</h3>
+          <p>Selecciona un paciente para ver su perfil y apoyarlo</p>
+        </div>
+        <div class="lista-buscador">
+          <input type="text" id="buscadorPaciente" placeholder="🔍  Buscar por nombre o diagnóstico..." />
+        </div>
+        <div class="lista-pacientes-cont" id="listaPacientesCont">
+          <!-- Generado por JS -->
+        </div>
+      </div>
+
+      <!-- VISTA: DETALLE (Orientada al donante) -->
+      <div id="vistaDetalle" style="display:none;">
+        <div class="detalle-header">
+          <button class="btn-volver" id="btnVolverLista">← Volver a la lista</button>
+        </div>
+
+        <!-- Tarjeta principal del paciente -->
+        <div style="text-align:center; padding: 24px 0 16px 0;">
+          <div id="det-avatar" style="font-size: 3.5rem; margin-bottom: 8px;">👤</div>
+          <h3 id="det-nombre" style="font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--brown-dark); margin:0 0 4px 0;">—</h3>
+          <p id="det-edad" style="font-size:0.9rem; color:var(--text-muted); margin:0;">—</p>
+        </div>
+
+        <!-- Badge de urgencia -->
+        <div id="det-ig" style="display:flex; align-items:center; gap:10px; justify-content:center; padding:10px 16px; border-radius:50px; background:rgba(192,82,42,0.08); border:1px solid rgba(192,82,42,0.2); margin:0 auto 20px auto; max-width:380px;">
+          <span>📊</span><span>Índice de Gravedad: —</span>
+        </div>
+
+        <!-- Info relevante para el donante -->
+        <div style="display:grid; gap:14px; max-width:480px; margin:0 auto;">
+          <div style="background:rgba(255,255,255,0.6); border:1px solid var(--border); border-radius:12px; padding:16px;">
+            <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Área Hospitalaria</span>
+            <p id="det-area" style="font-size:0.95rem; font-weight:500; color:var(--brown-dark); margin:4px 0 0 0;">—</p>
+          </div>
+          <div style="background:rgba(255,255,255,0.6); border:1px solid var(--border); border-radius:12px; padding:16px;">
+            <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Diagnóstico</span>
+            <p id="det-diagnostico" style="font-size:0.95rem; font-weight:500; color:var(--brown-dark); margin:4px 0 0 0;">—</p>
+          </div>
+          <div style="background:rgba(255,255,255,0.6); border:1px solid var(--border); border-radius:12px; padding:16px;">
+            <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">¿Qué necesita?</span>
+            <p id="det-necesidad" style="font-size:0.95rem; font-weight:600; color:var(--terracota); margin:4px 0 0 0;">—</p>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div style="background:rgba(255,255,255,0.6); border:1px solid var(--border); border-radius:12px; padding:16px;">
+              <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Clasificación</span>
+              <p id="det-triage" style="font-size:0.95rem; font-weight:500; color:var(--brown-dark); margin:4px 0 0 0;">—</p>
+            </div>
+            <div style="background:rgba(255,255,255,0.6); border:1px solid var(--border); border-radius:12px; padding:16px;">
+              <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Fecha de Ingreso</span>
+              <p id="det-fecha" style="font-size:0.95rem; font-weight:500; color:var(--brown-dark); margin:4px 0 0 0;">—</p>
+            </div>
+          </div>
+          <div style="background:rgba(42,157,143,0.06); border:1px solid rgba(42,157,143,0.2); border-radius:12px; padding:16px; text-align:center;">
+            <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#2A9D8F;">Apoyo Recaudado</span>
+            <p id="det-recaudado" style="font-size:1.6rem; font-weight:700; color:#2A9D8F; margin:6px 0 0 0;">$0</p>
+          </div>
+        </div>
+
+        <!-- Sección de Gastos Verificados / Transparencia -->
+        <div id="seccion-gastos-verificados" style="background:rgba(42,157,143,0.05); border:1px solid rgba(42,157,143,0.2); border-radius:12px; padding:16px; margin: 14px auto 0 auto; max-width:480px;">
+          <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#2A9D8F; display:block; margin-bottom:10px;">🧾 Transparencia de Gastos Autorizados</span>
+          <div id="det-evidencias-galeria" style="display:grid; gap:10px;">
+            <p style="font-size:0.82rem; color:var(--text-muted); margin:0; text-align:center;">No hay comprobantes de gastos autorizados aún.</p>
+          </div>
+        </div>
+
+        <!-- Aviso de verificación -->
+        <div style="display:flex; align-items:center; gap:8px; margin:20px auto 0 auto; max-width:480px; padding:10px 14px; background:rgba(212,162,76,0.08); border:1px solid rgba(212,162,76,0.2); border-radius:10px;">
+          <span>🔒</span>
+          <p style="font-size:0.78rem; color:var(--text-muted); margin:0;">Caso verificado por personal médico del Hospital General Dr. Carlos Canseco. Los datos del familiar/tutor se mantienen confidenciales.</p>
+        </div>
+
+        <div class="perfil-modal-footer" style="margin-top:20px;">
+          <button class="btn-ghost perfil-modal-footer" style="border:1.5px solid var(--border);border-radius:50px;padding:12px 20px;" id="btnVolverLista2">← Volver</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- MODAL DE DONACIÓN -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="donationModal">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div class="modal-header">
+        <img src="logo.png" alt="LATIR Logo" style="height: 44px; width: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; mix-blend-mode: multiply;" />
+        <h3 id="modalTitle">Apoyar a este paciente</h3>
+        <p id="modalCausa">Hospital "Dr. Carlos Canseco"</p>
+      </div>
+
+      <!-- PASO 1 -->
+      <div class="modal-step active" id="step1">
+        <p class="step-label">Elige el monto de tu aportación</p>
+        <div class="amount-options">
+          <button class="amount-btn" data-amount="50">$50</button>
+          <button class="amount-btn" data-amount="100">$100</button>
+          <button class="amount-btn selected" data-amount="200">$200</button>
+          <button class="amount-btn" data-amount="500">$500</button>
+          <button class="amount-btn" data-amount="1000">$1,000</button>
+        </div>
+        <div class="custom-amount">
+          <label>O ingresa un monto personalizado</label>
+          <div class="input-wrap">
+            <span class="input-prefix">$</span>
+            <input type="number" id="customAmount" placeholder="Otro monto" min="10" />
+          </div>
+        </div>
+        <div class="recurrence">
+          <label class="toggle-label">
+            <input type="checkbox" id="recurrente" />
+            <span class="toggle"></span>
+            Donación mensual recurrente
+          </label>
+        </div>
+        <div class="ig-info-box" id="igInfoBox" style="display:none;"></div>
+        <button class="btn-primary full" id="btnStep1">Continuar →</button>
+      </div>
+
+      <!-- PASO 2 -->
+      <div class="modal-step" id="step2">
+        <p class="step-label">Tus datos</p>
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input type="text" id="donorName" placeholder="Tu nombre" />
+        </div>
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input type="email" id="donorEmail" placeholder="tu@correo.com" />
+        </div>
+        <div class="form-group">
+          <label>Ocupación <span class="label-optional">(opcional)</span></label>
+          <select id="donorOcupacion">
+            <option value="">Selecciona...</option>
+            <option value="estudiante">Estudiante</option>
+            <option value="docente">Docente</option>
+            <option value="administrativo">Personal administrativo</option>
+            <option value="medico">Personal médico</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Método de pago</label>
+          <div class="payment-methods">
+            <button class="pay-btn selected" data-pay="transferencia" style="width:100%;">🏦 Transferencia Bancaria</button>
+          </div>
+          <div style="font-size:0.78rem; color:var(--text-muted); margin-top:8px; padding:8px 12px; background:rgba(var(--gold-rgb,212,162,76),0.08); border-radius:6px; border-left:3px solid var(--gold);">
+            En el siguiente paso encontrarás los datos para realizar tu transferencia. Una vez hecha, haz clic en <strong>"Confirmar Transferencia"</strong>.
+          </div>
+        </div>
+        <div class="form-row">
+          <button class="btn-ghost" id="btnBack1">← Atrás</button>
+          <button class="btn-primary" id="btnStep2">Continuar →</button>
+        </div>
+      </div>
+
+      <!-- PASO 3 -->
+      <div class="modal-step" id="step3">
+        <div class="confirm-icon">🏦</div>
+        <h4 class="confirm-title">Realiza tu transferencia</h4>
+
+        <!-- Resumen de la donación -->
+        <div class="confirm-summary" id="confirmSummary"></div>
+
+        <!-- Datos bancarios -->
+        <div id="datos-bancarios" style="background:rgba(42,157,143,0.07); border:1px solid rgba(42,157,143,0.3); border-radius:10px; padding:14px 16px; margin:14px 0; text-align:left;">
+          <p style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#2A9D8F; margin:0 0 10px 0;">📋 Datos para transferencia</p>
+          <div style="display:flex; flex-direction:column; gap:7px; font-size:0.85rem;">
+            <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Banco</span><strong>BBVA México</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Beneficiario</span><strong>Fondo LATIR — Hospital Canseco</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Cuenta LATIR</span><strong style="font-family:monospace; letter-spacing:0.05em;">4152 3139 7909 1282</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Concepto</span><strong id="concepto-transferencia">LATIR GENERAL</strong></div>
+            <div style="display:flex; justify-content:space-between;"><span style="color:#64748b;">Monto a transferir</span><strong id="monto-transferencia" style="color:var(--terracota);">—</strong></div>
+          </div>
+        </div>
+
+        <div class="transparencia-aviso">
+          <span>🔒</span>
+          <p>Una vez que hayas realizado la transferencia, haz clic en <strong>"Confirmar"</strong> para registrar tu donación. Recibirás un reporte del uso de los fondos.</p>
+        </div>
+        <div class="form-row">
+          <button class="btn-ghost" id="btnBack2">← Atrás</button>
+          <button class="btn-primary" id="btnConfirm">✅ Confirmar Transferencia</button>
+        </div>
+      </div>
+
+      <!-- PASO 4: ÉXITO -->
+      <div class="modal-step" id="step4">
+        <div class="success-animation">
+          <div class="success-circle">✓</div>
+        </div>
+        <h4 class="confirm-title">¡Gracias por tu apoyo!</h4>
+        <p class="success-msg">Recibirás un correo de confirmación y actualizaciones del paciente que apoyaste. Tu generosidad hace posible su recuperación.</p>
+        <button class="btn-primary full" id="btnClose">Cerrar</button>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="modal-progress">
+        <div class="progress-step active" data-step="1">1</div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="2">2</div>
+        <div class="progress-line"></div>
+        <div class="progress-step" data-step="3">3</div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL LEGAL -->
+  <div class="modal-overlay" id="legalOverlay">
+    <div class="modal lista-modal" id="legalModal" style="max-width:560px;">
+      <button class="modal-close" onclick="cerrarLegal()">✕</button>
+      <div class="modal-header">
+        <span class="modal-icon" id="legalIcon">🔒</span>
+        <h3 id="legalTitulo">Informacion Legal</h3>
+      </div>
+      <div id="legalContenido" style="font-size:0.88rem;color:var(--text-muted);line-height:1.7;max-height:55vh;overflow-y:auto;padding-right:8px;"></div>
+      <div style="margin-top:20px;text-align:center;">
+        <button class="btn-primary" onclick="cerrarLegal()">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    // Legal modal content
+    const legalData = {
+      privacidad: {
+        icon: '🔒',
+        titulo: 'Aviso de Privacidad',
+        contenido: `<p><strong>LATIR</strong> se compromete a proteger la privacidad de todos los usuarios de esta plataforma.</p>
+          <p><strong>Datos que recopilamos:</strong></p>
+          <ul style="padding-left:20px;margin:10px 0;">
+            <li>Informacion clinica basica del paciente (nombre, edad, diagnostico)</li>
+            <li>Datos del tutor o familiar (nombre, telefono, municipio)</li>
+            <li>Datos del donante (nombre, correo, monto de donacion)</li>
+          </ul>
+          <p><strong>Uso de los datos:</strong> Los datos son utilizados exclusivamente para la gestion de solicitudes de apoyo, verificacion de casos y seguimiento de donaciones.</p>
+          <p><strong>Proteccion:</strong> Toda la informacion es almacenada de forma segura y no se comparte con terceros sin autorizacion expresa.</p>
+          <p style="margin-top:12px;font-size:0.82rem;color:var(--text-light);">Proyecto academico — Instituto Tecnologico de Ciudad Madero.</p>`
+      },
+      terminos: {
+        icon: '📋',
+        titulo: 'Terminos de Uso',
+        contenido: `<p>Al utilizar la plataforma <strong>LATIR</strong>, usted acepta los siguientes terminos:</p>
+          <ol style="padding-left:20px;margin:10px 0;line-height:2;">
+            <li>La plataforma es de caracter academico y social, sin fines de lucro.</li>
+            <li>Las donaciones son voluntarias y se canalizan directamente a los pacientes verificados.</li>
+            <li>LATIR no garantiza resultados medicos, unicamente facilita la recaudacion de fondos.</li>
+            <li>Los casos publicados son verificados por personal del Hospital General Dr. Carlos Canseco.</li>
+            <li>El uso indebido de la plataforma resultara en la suspension inmediata del acceso.</li>
+          </ol>
+          <p style="margin-top:12px;font-size:0.82rem;color:var(--text-light);">Ultima actualizacion: Mayo 2026.</p>`
+      },
+      consentimiento: {
+        icon: '✅',
+        titulo: 'Consentimiento Informado',
+        contenido: `<p>Al enviar una solicitud de apoyo o realizar una donacion en <strong>LATIR</strong>, usted otorga su consentimiento para:</p>
+          <ul style="padding-left:20px;margin:10px 0;line-height:2;">
+            <li>La publicacion parcial de datos clinicos del paciente (diagnostico general, area hospitalaria) con fines de recaudacion.</li>
+            <li>El contacto por parte del equipo LATIR para verificacion de informacion.</li>
+            <li>La recepcion de notificaciones sobre el estado de la solicitud o donacion.</li>
+          </ul>
+          <p><strong>Datos confidenciales:</strong> Los datos completos del tutor (telefono, direccion, INE) son de acceso restringido exclusivamente para el equipo administrativo y personal autorizado del hospital.</p>
+          <p style="margin-top:12px;font-size:0.82rem;color:var(--text-light);">Puede revocar su consentimiento en cualquier momento contactando al administrador.</p>`
+      }
+    };
+
+    function abrirLegal(tipo) {
+      const data = legalData[tipo];
+      if (!data) return;
+      document.getElementById('legalIcon').textContent = data.icon;
+      document.getElementById('legalTitulo').textContent = data.titulo;
+      document.getElementById('legalContenido').innerHTML = data.contenido;
+      document.getElementById('legalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function cerrarLegal() {
+      document.getElementById('legalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('legalOverlay').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('legalOverlay')) cerrarLegal();
+    });
+  </script>
+  <script src="latir-session.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LATIR — Solicitar Apoyo</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, var(--cream) 0%, #e2e8f0 100%);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 40px 5%;
+    }
+    .auth-card {
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: var(--shadow-strong);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      padding: 40px; border-radius: var(--radius-lg);
+      width: 100%; max-width: 520px;
+    }
+    .auth-header { text-align: center; margin-bottom: 25px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 12px 16px; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; background: rgba(255,255,255,0.6); outline: none; transition: 0.3s;
+      box-sizing: border-box;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--terracota); background: #fff;
+    }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      color: var(--brown-dark); font-size: 0.95rem;
+      font-weight: 700; margin: 22px 0 12px;
+      padding-bottom: 6px; border-bottom: 1px solid var(--border);
+    }
+    .action-links { text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-muted); }
+    .action-links a { color: var(--gold); text-decoration: none; font-weight: 500; }
+    .action-links a:hover { text-decoration: underline; }
+    .notice-box {
+      background: rgba(var(--terracota-rgb, 180,90,60), 0.07);
+      border-left: 3px solid var(--terracota);
+      border-radius: 6px; padding: 10px 14px;
+      font-size: 0.82rem; color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <div class="auth-header">
+      <img src="logo.png" alt="LATIR Logo" style="height: 64px; width: auto; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; mix-blend-mode: multiply;" />
+      <h1 style="font-family:'Playfair Display',serif; color:var(--brown-dark); font-size:1.4rem; margin:8px 0 4px;">Solicitar Apoyo</h1>
+      <p style="color:var(--text-muted); font-size:0.85rem;">Complete el formulario para registrar a un paciente que necesita apoyo.</p>
+    </div>
+
+    <div class="notice-box">
+      ℹ️ Su solicitud será enviada al equipo de LATIR para evaluación. Le contactaremos a través de los datos proporcionados.
+    </div>
+
+    <form id="solicitudForm">
+
+      <div class="section-title">👤 Datos del Paciente</div>
+
+      <div class="form-group">
+        <label>Nombre Completo del Paciente *</label>
+        <input type="text" name="nombre" required placeholder="Nombre completo">
+      </div>
+      <div class="form-group">
+        <label>Edad *</label>
+        <input type="number" name="edad" required placeholder="Años" min="0" max="120">
+      </div>
+      <div class="form-group">
+        <label>Sexo *</label>
+        <select name="sexo" required>
+          <option value="">— Seleccionar —</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Femenino">Femenino</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Área Médica / Servicio</label>
+        <input type="text" name="area" placeholder="Ej. Oncología, Cardiología...">
+      </div>
+      <div class="form-group">
+        <label>Diagnóstico *</label>
+        <textarea name="diagnostico" required placeholder="Describa brevemente el diagnóstico"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Necesidad Principal *</label>
+        <textarea name="necesidad" required placeholder="¿Qué tipo de apoyo necesita? (medicamentos, traslados, económico, etc.)"></textarea>
+      </div>
+
+      <div class="section-title">👨‍👩‍👧 Datos del Familiar / Tutor</div>
+
+      <div class="form-group">
+        <label>Nombre del Familiar / Tutor *</label>
+        <input type="text" name="tutorNombre" required placeholder="Nombre completo">
+      </div>
+      <div class="form-group">
+        <label>Parentesco *</label>
+        <input type="text" name="tutorParentesco" required placeholder="Ej. Madre, Hermano, Tutor legal...">
+      </div>
+      <div class="form-group">
+        <label>Teléfono de Contacto *</label>
+        <input type="tel" name="tutorTelefono" required placeholder="10 dígitos">
+      </div>
+      <div class="form-group">
+        <label>Municipio de Residencia</label>
+        <input type="text" name="tutorMunicipio" placeholder="Municipio o ciudad">
+      </div>
+      <div class="form-group">
+        <label>Nivel Socioeconómico</label>
+        <select name="tutorNivel">
+          <option value="">— Opcional —</option>
+          <option value="Bajo">Bajo</option>
+          <option value="Medio-Bajo">Medio-Bajo</option>
+          <option value="Medio">Medio</option>
+          <option value="Medio-Alto">Medio-Alto</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Número de Dependientes Económicos</label>
+        <input type="number" name="tutorDependientes" placeholder="Ej. 3" min="0">
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn-primary large full" style="margin-top: 18px;">Enviar Solicitud</button>
+    </form>
+
+    <div class="action-links">
+      <a href="Interfaz latir.html">← Volver al inicio</a>
+      &nbsp;·&nbsp;
+      <a href="login.html">Acceso administrativo</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('solicitudForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.textContent = 'Enviando...';
+
+        const data = Object.fromEntries(new FormData(e.target).entries());
+
+        try {
+            const res = await fetch('http://localhost:3000/solicitar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+
+            if (res.ok && result.success) {
+                alert('✅ ¡Solicitud enviada correctamente!\n\nNuestro equipo la revisará pronto. Gracias por contactarnos.');
+                e.target.reset();
+            } else {
+                alert('❌ Error al enviar: ' + (result.error || 'Intente de nuevo más tarde.'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert('❌ Error de conexión. Verifique que el servidor esté activo.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Enviar Solicitud';
+        }
+    });
+  </script>
+</body>
+</html>

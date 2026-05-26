@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LATIR — Acceso Administrativo</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    body { 
+        background: linear-gradient(135deg, var(--cream) 0%, #e2e8f0 100%); 
+        min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        padding: 40px 5%;
+    }
+    .auth-card {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        box-shadow: var(--shadow-strong);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        padding: 40px; border-radius: var(--radius-lg);
+        width: 100%; max-width: 440px;
+    }
+    .auth-header { text-align: center; margin-bottom: 30px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+    .form-group input { 
+        width: 100%; padding: 12px 16px; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+        font-family: 'DM Sans', sans-serif; font-size: 0.95rem; background: rgba(255,255,255,0.6); outline: none; transition: 0.3s;
+    }
+    .form-group input:focus { border-color: var(--terracota); background: #fff; }
+    .action-links { text-align: center; margin-top: 24px; font-size: 0.85rem; color: var(--text-muted); }
+    .action-links a { color: var(--gold); text-decoration: none; font-weight: 500; }
+    .action-links a:hover { text-decoration: underline; }
+    .admin-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: rgba(192, 82, 42, 0.08); color: var(--terracota);
+        font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; padding: 4px 14px; border-radius: 50px;
+        margin-bottom: 12px;
+    }
+    .error-box {
+        background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
+        padding: 10px 14px; font-size: 0.82rem; color: #b91c1c;
+        margin-bottom: 16px; display: none; text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <div class="auth-header">
+      <img src="logo.png" alt="LATIR Logo" style="height: 64px; width: auto; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; mix-blend-mode: multiply;" />
+      <span class="admin-badge">🔒 Acceso exclusivo</span>
+      <p style="color:var(--text-muted); font-size: 0.85rem; margin-top: 5px;">Panel de administracion LATIR</p>
+    </div>
+
+    <div id="login-error" class="error-box"></div>
+
+    <form id="loginForm" novalidate>
+      <div class="form-group">
+        <label>Correo Electronico</label>
+        <input type="email" name="correo" required placeholder="admin@correo.com">
+      </div>
+      <div class="form-group">
+        <label>Contrasena</label>
+        <input type="password" name="password" required placeholder="••••••••">
+      </div>
+      
+      <button type="submit" class="btn-primary large full" id="btnLogin" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <span>Acceder al Panel</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" y1="12" x2="3" y2="12"></line>
+        </svg>
+      </button>
+    </form>
+
+    <div class="action-links">
+      <a href="Interfaz latir.html" style="color: var(--text-light);">← Volver a LATIR</a>
+    </div>
+  </div>
+
+  <script src="latir-session.js"></script>
+  <script>
+    async function ejecutarLogin() {
+        const btn = document.getElementById('btnLogin');
+        if (btn.disabled) return;
+
+        const errEl = document.getElementById('login-error');
+        const form = document.getElementById('loginForm');
+        errEl.style.display = 'none';
+
+        const correo = form.querySelector('[name="correo"]').value.trim();
+        const password = form.querySelector('[name="password"]').value;
+
+        if (!correo || !password) {
+            errEl.textContent = '❌ Por favor llena tu correo y contraseña.';
+            errEl.style.display = 'block';
+            return;
+        }
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)) {
+            errEl.textContent = '❌ Ingresa un correo electrónico válido.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.querySelector('span').textContent = 'Verificando...';
+        
+        try {
+            const res = await fetch('http://localhost:3000/login', {
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ correo, password })
+            });
+            const result = await res.json();
+            if(res.ok && result.success) {
+                LATIR_SESSION.guardar('admin', result.user);
+                window.location.href = 'admin.html';
+            } else {
+                errEl.textContent = '❌ Credenciales incorrectas o acceso no autorizado.';
+                errEl.style.display = 'block';
+                btn.disabled = false;
+                btn.querySelector('span').textContent = 'Acceder al Panel';
+            }
+        } catch(err) {
+            console.error(err);
+            errEl.textContent = '❌ Error del servidor. Asegurate que este corriendo.';
+            errEl.style.display = 'block';
+            btn.disabled = false;
+            btn.querySelector('span').textContent = 'Acceder al Panel';
+        }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        ejecutarLogin();
+    });
+
+    document.getElementById('btnLogin').addEventListener('click', () => {
+        if (document.getElementById('btnLogin').disabled) return;
+        ejecutarLogin();
+    });
+  </script>
+</body>
+</html>

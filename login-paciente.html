@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Acceso de Pacientes — LATIR</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+    <style>
+        .auth-container { max-width: 400px; margin: 100px auto; padding: 30px; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        .auth-title { text-align: center; font-family: 'Playfair Display', serif; color: var(--brown-dark); margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
+        .input-group input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
+        .btn-submit { width: 100%; padding: 12px; background: var(--terracota); color: #fff; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .btn-submit:hover { background: #b04323; }
+        .error-msg { color: red; font-size: 0.85rem; text-align: center; margin-bottom: 10px; }
+    </style>
+</head>
+<body style="background: var(--bg-light);">
+
+    <nav class="navbar" id="navbar">
+        <a href="Interfaz latir.html" class="nav-logo" style="text-decoration: none;">
+            <img src="logo.png" alt="LATIR Logo" style="height: 48px; width: auto; mix-blend-mode: multiply;" />
+        </a>
+    </nav>
+
+    <div class="auth-container">
+        <h2 class="auth-title">Acceso de Pacientes</h2>
+        <p style="text-align: center; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px;">Sube tus comprobantes de gastos</p>
+        <div id="errorMsg" class="error-msg"></div>
+        <form id="loginForm" novalidate>
+            <div class="input-group">
+                <label>Correo Electrónico</label>
+                <input type="email" id="correo" required placeholder="ej. paciente1@latir.org" />
+            </div>
+            <div class="input-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" required />
+            </div>
+            <button type="submit" class="btn-submit" id="btnLogin">Ingresar</button>
+        </form>
+    </div>
+
+    <script src="latir-session.js"></script>
+    <script>
+        async function ejecutarLogin() {
+            const btn = document.getElementById('btnLogin');
+            if (btn.disabled) return;
+
+            const errorMsgEl = document.getElementById('errorMsg');
+            errorMsgEl.textContent = '';
+
+            const correo = document.getElementById('correo').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!correo || !password) {
+                errorMsgEl.textContent = '❌ Por favor llena tu correo y contraseña.';
+                return;
+            }
+            if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(correo)) {
+                errorMsgEl.textContent = '❌ Ingresa un correo electrónico válido.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Ingresando...';
+
+            try {
+                const res = await fetch('http://localhost:3000/pacientes/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ correo, password })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    LATIR_SESSION.guardar('paciente', data.paciente);
+                    window.location.href = 'dashboard-paciente.html';
+                } else {
+                    errorMsgEl.textContent = '❌ ' + (data.error || 'Credenciales inválidas');
+                    btn.disabled = false;
+                    btn.textContent = 'Ingresar';
+                }
+            } catch(err) {
+                errorMsgEl.textContent = '❌ Error de conexión con el servidor.';
+                btn.disabled = false;
+                btn.textContent = 'Ingresar';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            ejecutarLogin();
+        });
+
+        document.getElementById('btnLogin').addEventListener('click', () => {
+            if (document.getElementById('btnLogin').disabled) return;
+            ejecutarLogin();
+        });
+    </script>
+</body>
+</html>

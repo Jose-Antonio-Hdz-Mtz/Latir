@@ -1,0 +1,24 @@
+{
+  "name": "latir",
+  "version": "1.0.0",
+  "description": "Plataforma LATIR — Lucha y Apoyo Transparente para Pacientes",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "pg": "^8.21.0"
+  }
+}

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel de Paciente — LATIR</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+    <style>
+        .dashboard { max-width: 800px; margin: 40px auto; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .recaudado-title { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; }
+        .recaudado-amount { font-size: 2.5rem; color: #2A9D8F; font-weight: bold; font-family: 'Playfair Display', serif; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
+        .btn-submit { background: var(--terracota); color: #fff; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); }
+        th { background: rgba(0,0,0,0.02); font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+        .badge-Pendiente { background: #fff3cd; color: #856404; }
+        .badge-Aprobada { background: #d4edda; color: #155724; }
+        .badge-Rechazada { background: #f8d7da; color: #721c24; }
+        .btn-logout { background: transparent; border: 1px solid var(--border); padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body style="background: var(--bg-light);">
+
+    <nav class="navbar" id="navbar">
+        <a href="Interfaz latir.html" class="nav-logo" style="text-decoration: none;">
+            <img src="logo.png" alt="LATIR Logo" style="height: 48px; width: auto; mix-blend-mode: multiply;" />
+        </a>
+    </nav>
+
+    <div class="dashboard">
+        <div class="header">
+            <div>
+                <h2 style="font-family: 'Playfair Display', serif; color: var(--brown-dark);">Bienvenido, <span id="pacNombre"></span></h2>
+                <p style="color: var(--text-muted);">Sube tus recibos para mantener la transparencia del apoyo recibido.</p>
+            </div>
+            <button class="btn-logout" onclick="logout()">Cerrar sesión</button>
+        </div>
+
+        <div class="card" style="text-align: center; border: 1px solid rgba(42,157,143,0.2); background: rgba(42,157,143,0.05);">
+            <div class="recaudado-title">Total de Apoyo Recibido</div>
+            <div class="recaudado-amount" id="pacRecaudado">$0.00</div>
+        </div>
+
+        <!-- Tarjeta Número de Tarjeta -->
+        <div class="card" style="border: 1px solid rgba(212,162,76,0.2); background: rgba(212,162,76,0.02);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-family: 'Playfair Display', serif; color: var(--brown-dark);">💳 Datos Bancarios para Transferencias</h3>
+                <span id="clabeStatusBadge" class="badge" style="background: rgba(192,82,42,0.1); color: var(--terracota);">Sin registrar</span>
+            </div>
+            <p style="font-size: 0.86rem; color: var(--text-muted); margin: 0 0 15px 0; line-height: 1.4;">
+                Ingresa tu número de tarjeta bancaria (16 dígitos) para que la administración de LATIR pueda realizarte la transferencia de las donaciones acreditadas directamente a tu cuenta.
+            </p>
+            <form id="clabeForm" style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 250px; margin-bottom: 0;">
+                    <label for="clabeInput" style="font-weight: 500; font-size: 0.8rem; text-transform: uppercase; color: var(--text-light);">Número de Tarjeta (16 dígitos)</label>
+                    <input type="text" id="clabeInput" placeholder="Ej. 1234 5678 9012 3456" maxlength="19" pattern="[\d ]{16,19}" style="font-family: monospace; letter-spacing: 3px; font-size: 1.1rem; padding: 10px 12px;" required />
+                </div>
+                <button type="submit" class="btn-submit" style="height: 44px; padding: 0 24px; font-weight: 500; background: var(--terracota); transition: all 0.3s;">Guardar Tarjeta</button>
+            </form>
+            <p id="msgClabe" style="margin-top: 10px; font-size: 0.85rem; color: green; font-weight: 500; display: none;"></p>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">Subir Comprobante de Gasto</h3>
+            
+            <!-- Mensaje para cuando la solicitud no ha sido aceptada o no está activo -->
+            <div id="msgNoActivo" style="display: none; padding: 20px; border-radius: 8px; background: rgba(192,82,42,0.06); border: 1px dashed var(--terracota); text-align: center; color: var(--brown-dark); margin: 10px 0;">
+                <span style="font-size: 2.2rem; display: block; margin-bottom: 10px;">⏳</span>
+                <strong style="display: block; font-size: 1rem; margin-bottom: 6px;">Caso en Proceso de Evaluación</strong>
+                <p style="font-size: 0.86rem; color: var(--text-muted); margin: 0; line-height: 1.5; max-width: 500px; margin: 0 auto;">
+                    Tu solicitud de apoyo aún no ha sido aprobada por la administración. Podrás subir comprobantes de gastos médicos y medicamentos una vez que tu caso sea evaluado, publicado y se encuentre <b>Activo</b> para recibir donaciones.
+                </p>
+            </div>
+
+            <form id="evidenciaForm" style="display: none;">
+                <div class="form-group">
+                    <label>Descripción del Gasto (ej. Compra de antibióticos)</label>
+                    <input type="text" id="descGasto" required />
+                </div>
+                <div class="form-group">
+                    <label>Monto Comprobado ($ MXN)</label>
+                    <input type="number" id="montoGasto" step="0.01" required />
+                </div>
+                <div class="form-group">
+                    <label>Foto o PDF del Recibo / Factura</label>
+                    <input type="file" id="archivoEvidencia" accept="image/*,.pdf" required />
+                </div>
+                <button type="submit" class="btn-submit">Enviar para Revisión</button>
+            </form>
+            <p id="msgForm" style="margin-top:10px; font-size:0.85rem; color:green;"></p>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">Historial de Comprobantes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th>Estado</th>
+                        <th>Archivo</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaEvidencias">
+                    <!-- Generado por JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="latir-session.js"></script>
+    <script>
+        const formatMoney = (n) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+        
+        let pacienteSesion = null;
+
+        async function init() {
+            pacienteSesion = LATIR_SESSION.proteger('paciente');
+            if(!pacienteSesion) {
+                document.body.style.display = 'none';
+                return;
+            }
+            const localPac = pacienteSesion;
+            
+            try {
+                // Consultar estado en tiempo real en el backend
+                const res = await fetch(`http://localhost:3000/pacientes/estado/${localPac.id}`);
+                const data = await res.json();
+                
+                if (data.success) {
+                    pacienteSesion = data.paciente;
+                    // Actualizar session con la información fresca del backend
+                    LATIR_SESSION.guardar('paciente', pacienteSesion);
+                    
+                    document.getElementById('pacNombre').textContent = pacienteSesion.nombre;
+                    document.getElementById('pacRecaudado').textContent = formatMoney(pacienteSesion.recaudado || 0);
+                    
+                    // Mostrar u ocultar el formulario según el estado
+                    if (pacienteSesion.estado === 'Activo') {
+                        document.getElementById('msgNoActivo').style.display = 'none';
+                        document.getElementById('evidenciaForm').style.display = 'block';
+                    } else {
+                        document.getElementById('msgNoActivo').style.display = 'block';
+                        document.getElementById('evidenciaForm').style.display = 'none';
+                    }
+
+                    // Cargar número de tarjeta del paciente
+                    const clabeInput = document.getElementById('clabeInput');
+                    const clabeStatusBadge = document.getElementById('clabeStatusBadge');
+                    if (pacienteSesion.clabe) {
+                        clabeInput.value = formatCardNumber(pacienteSesion.clabe);
+                        clabeStatusBadge.textContent = 'Registrada';
+                        clabeStatusBadge.style.background = 'rgba(42,157,143,0.1)';
+                        clabeStatusBadge.style.color = '#2A9D8F';
+                    } else {
+                        clabeInput.value = '';
+                        clabeStatusBadge.textContent = 'Sin registrar';
+                        clabeStatusBadge.style.background = 'rgba(192,82,42,0.1)';
+                        clabeStatusBadge.style.color = 'var(--terracota)';
+                    }
+                    
+                    cargarEvidencias();
+                } else {
+                    // Fallback con datos locales si la consulta falla
+                    pacienteSesion = localPac;
+                    document.getElementById('pacNombre').textContent = pacienteSesion.nombre;
+                    document.getElementById('pacRecaudado').textContent = formatMoney(pacienteSesion.recaudado || 0);
+                    document.getElementById('msgNoActivo').style.display = 'block';
+                    document.getElementById('evidenciaForm').style.display = 'none';
+                    
+                    const clabeInput = document.getElementById('clabeInput');
+                    const clabeStatusBadge = document.getElementById('clabeStatusBadge');
+                    if (pacienteSesion.clabe) {
+                        clabeInput.value = formatCardNumber(pacienteSesion.clabe);
+                        clabeStatusBadge.textContent = 'Registrada';
+                    }
+                }
+            } catch (err) {
+                console.error("Error al inicializar dashboard", err);
+                pacienteSesion = localPac;
+                document.getElementById('pacNombre').textContent = pacienteSesion.nombre;
+                document.getElementById('pacRecaudado').textContent = formatMoney(pacienteSesion.recaudado || 0);
+                document.getElementById('msgNoActivo').style.display = 'block';
+                document.getElementById('evidenciaForm').style.display = 'none';
+            }
+        }
+
+        async function cargarEvidencias() {
+            try {
+                const res = await fetch(`http://localhost:3000/pacientes/${pacienteSesion.id}/evidencias`);
+                const data = await res.json();
+                const tbody = document.getElementById('tablaEvidencias');
+                tbody.innerHTML = '';
+                
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No has subido comprobantes aún.</td></tr>';
+                    return;
+                }
+
+                data.forEach(e => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${e.Fecha}</td>
+                        <td>${e.Descripcion}</td>
+                        <td>${formatMoney(e.MontoComprobado)}</td>
+                        <td><span class="badge badge-${e.Estado}">${e.Estado}</span></td>
+                        <td><a href="http://localhost:3000/uploads/${e.RutaArchivo}" target="_blank">Ver</a></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error("Error cargando evidencias", err);
+            }
+        }
+
+        document.getElementById('evidenciaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const desc = document.getElementById('descGasto').value;
+            const monto = document.getElementById('montoGasto').value;
+            const archivoInput = document.getElementById('archivoEvidencia');
+            
+            if(!archivoInput.files[0]) return alert("Selecciona un archivo");
+
+            const formData = new FormData();
+            formData.append('pacienteId', pacienteSesion.id);
+            formData.append('descripcion', desc);
+            formData.append('monto', monto);
+            formData.append('archivoEvidencia', archivoInput.files[0]);
+
+            try {
+                const res = await fetch('http://localhost:3000/pacientes/evidencia', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById('msgForm').textContent = "Evidencia subida correctamente. Esperando revisión.";
+                    document.getElementById('evidenciaForm').reset();
+                    cargarEvidencias();
+                } else {
+                    alert(data.error || "Error al subir evidencia");
+                }
+            } catch (err) {
+                alert("Error de conexión");
+            }
+        });
+
+        // Helper: dar formato visual a número de tarjeta (grupos de 4)
+        function formatCardNumber(num) {
+            const digits = num.replace(/\D/g, '');
+            return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+        }
+
+        // Auto-formatear mientras el usuario escribe
+        document.getElementById('clabeInput').addEventListener('input', function() {
+            const digits = this.value.replace(/\D/g, '').slice(0, 16);
+            this.value = digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+        });
+
+        // Lógica del Formulario de Número de Tarjeta
+        document.getElementById('clabeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const rawValue = document.getElementById('clabeInput').value.trim();
+            const clabe = rawValue.replace(/\s/g, ''); // quitar espacios → solo 16 dígitos
+            const msgClabe = document.getElementById('msgClabe');
+            const clabeStatusBadge = document.getElementById('clabeStatusBadge');
+            
+            if (!/^\d{16}$/.test(clabe)) {
+                return alert("El número de tarjeta debe contener exactamente 16 dígitos numéricos.");
+            }
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = "Guardando...";
+
+            try {
+                const res = await fetch(`http://localhost:3000/pacientes/${pacienteSesion.id}/clabe`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ clabe })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    msgClabe.style.display = 'block';
+                    msgClabe.style.color = '#2A9D8F';
+                    msgClabe.textContent = "✅ Número de tarjeta guardado correctamente.";
+                    
+                    // Actualizar sesión local
+                    pacienteSesion.clabe = clabe;
+                    LATIR_SESSION.guardar('paciente', pacienteSesion);
+                    
+                    clabeStatusBadge.textContent = 'Registrada';
+                    clabeStatusBadge.style.background = 'rgba(42,157,143,0.1)';
+                    clabeStatusBadge.style.color = '#2A9D8F';
+                    
+                    setTimeout(() => { msgClabe.style.display = 'none'; }, 4000);
+                } else {
+                    alert(data.error || "Error al actualizar el número de tarjeta.");
+                }
+            } catch (err) {
+                alert("Error de conexión al servidor. Verifica que el servidor esté corriendo.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Guardar Tarjeta";
+            }
+        });
+
+        function logout() {
+            LATIR_SESSION.limpiarTodo();
+            window.location.href = 'auth.html?tab=login&role=paciente';
+        }
+
+        init();
+    </script>
+</body>
+</html>

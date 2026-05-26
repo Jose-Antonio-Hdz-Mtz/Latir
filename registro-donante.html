@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LATIR — Únete como Donante</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #1a0a05 0%, #3d1f0d 40%, #5c2d1a 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 5%;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ——— Layout ——— */
+    .auth-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100%;
+      max-width: 900px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+    }
+    @media (max-width: 640px) {
+      .auth-wrapper { grid-template-columns: 1fr; }
+      .auth-brand { display: none; }
+    }
+
+    /* ——— Brand Panel (izquierda) ——— */
+    .auth-brand {
+      background: linear-gradient(160deg, #c0522a 0%, #d4a24c 100%);
+      padding: 50px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .brand-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+    .brand-logo img { height: 44px; background: rgba(255, 255, 255, 0.9); padding: 4px 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .brand-logo span { font-family: 'Playfair Display', serif; color: #fff; font-size: 1.5rem; font-weight: 700; }
+    .brand-headline { font-family: 'Playfair Display', serif; color: #fff; font-size: 2rem; line-height: 1.3; font-weight: 700; margin-bottom: 16px; }
+    .brand-headline em { font-style: italic; opacity: 0.9; }
+    .brand-desc { color: rgba(255,255,255,0.85); font-size: 0.9rem; line-height: 1.6; }
+    .brand-features { margin-top: 32px; display: flex; flex-direction: column; gap: 12px; }
+    .brand-feat { display: flex; align-items: center; gap: 10px; color: rgba(255,255,255,0.9); font-size: 0.85rem; }
+    .brand-feat-icon { width: 28px; height: 28px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; }
+    .brand-back { color: rgba(255,255,255,0.7); font-size: 0.82rem; text-decoration: none; transition: color 0.2s; }
+    .brand-back:hover { color: #fff; }
+
+    /* ——— Form Panel (derecha) ——— */
+    .auth-form-panel {
+      background: rgba(255, 255, 255, 0.97);
+      padding: 50px 44px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ——— Tabs ——— */
+    .auth-tabs {
+      display: flex;
+      gap: 0;
+      border-radius: 10px;
+      background: #f1f5f9;
+      padding: 4px;
+      margin-bottom: 32px;
+    }
+    .auth-tab {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .auth-tab.active {
+      background: #fff;
+      color: var(--terracota);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* ——— Form ——— */
+    .auth-panel { display: none; }
+    .auth-panel.active { display: block; }
+
+    .form-title {
+      font-family: 'Playfair Display', serif;
+      color: var(--brown-dark, #2c1a0e);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+    }
+    .form-subtitle { font-size: 0.84rem; color: #64748b; margin: 0 0 24px 0; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .fg { margin-bottom: 16px; }
+    .fg label { display: block; font-size: 0.78rem; font-weight: 700; color: #64748b; margin-bottom: 6px; letter-spacing: 0.03em; text-transform: uppercase; }
+    .fg input, .fg select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      background: #f8fafc;
+      outline: none;
+      transition: all 0.25s;
+      color: #1e293b;
+    }
+    .fg input:focus, .fg select:focus {
+      border-color: var(--terracota, #c0522a);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(192,82,42,0.1);
+    }
+    .fg input.error { border-color: #ef4444; }
+
+    .btn-auth {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--terracota, #c0522a) 0%, #e07040 100%);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      margin-top: 6px;
+      letter-spacing: 0.02em;
+    }
+    .btn-auth:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(192,82,42,0.35); }
+    .btn-auth:disabled { opacity: 0.65; transform: none; cursor: not-allowed; }
+
+    .auth-divider { text-align: center; color: #94a3b8; font-size: 0.8rem; margin: 20px 0; position: relative; }
+    .auth-divider::before, .auth-divider::after {
+      content: ''; position: absolute; top: 50%; width: 42%; height: 1px; background: #e2e8f0;
+    }
+    .auth-divider::before { left: 0; }
+    .auth-divider::after { right: 0; }
+
+    .error-msg {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: #b91c1c;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .success-msg {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: #15803d;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .password-hint { font-size: 0.74rem; color: #94a3b8; margin-top: 4px; }
+    .link-tab { color: var(--terracota, #c0522a); font-weight: 600; cursor: pointer; text-decoration: underline; background: none; border: none; font-family: inherit; font-size: inherit; }
+  </style>
+</head>
+<body>
+
+  <div class="auth-wrapper">
+
+    <!-- ══ PANEL IZQUIERDO: Brand ══ -->
+    <div class="auth-brand">
+      <div>
+        <div class="brand-logo">
+          <img src="logo.png" alt="LATIR">
+          <span>LATIR</span>
+        </div>
+        <h2 class="brand-headline">Tu apoyo<br><em>transforma vidas</em></h2>
+        <p class="brand-desc">
+          Regístrate como donante y sé parte de la red de apoyo para pacientes en urgencias del Hospital General Dr. Carlos Canseco.
+        </p>
+        <div class="brand-features">
+          <div class="brand-feat"><div class="brand-feat-icon">📊</div>Visualiza en tiempo real cómo se usan tus recursos</div>
+          <div class="brand-feat"><div class="brand-feat-icon">🏥</div>Elige directamente a quién apoyar por IG</div>
+          <div class="brand-feat"><div class="brand-feat-icon">🔒</div>Transparencia total — cada peso, rastreado</div>
+          <div class="brand-feat"><div class="brand-feat-icon">📬</div>Historial completo de todas tus donaciones</div>
+        </div>
+      </div>
+      <a href="Interfaz latir.html" class="brand-back">← Volver al portal LATIR</a>
+    </div>
+
+    <!-- ══ PANEL DERECHO: Formularios ══ -->
+    <div class="auth-form-panel">
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabRegistro" onclick="switchAuthTab('registro')">Crear cuenta</button>
+        <button class="auth-tab" id="tabLogin" onclick="switchAuthTab('login')">Iniciar sesión</button>
+      </div>
+
+      <!-- REGISTRO -->
+      <div class="auth-panel active" id="panelRegistro">
+        <h2 class="form-title">Crear mi cuenta</h2>
+        <p class="form-subtitle">Únete en menos de 1 minuto y empieza a hacer la diferencia.</p>
+
+        <div id="reg-error" class="error-msg"></div>
+        <div id="reg-success" class="success-msg"></div>
+
+        <form id="registroForm">
+          <div class="form-row">
+            <div class="fg">
+              <label>Nombre *</label>
+              <input type="text" name="nombre" required placeholder="Nombre">
+            </div>
+            <div class="fg">
+              <label>Apellido *</label>
+              <input type="text" name="apellido" required placeholder="Apellido">
+            </div>
+          </div>
+          <div class="fg">
+            <label>Correo Electrónico *</label>
+            <input type="email" name="correo" required placeholder="tu@correo.com">
+          </div>
+          <div class="fg">
+            <label>Contraseña *</label>
+            <input type="password" name="password" required placeholder="Mínimo 8 caracteres" minlength="8">
+            <p class="password-hint">Al menos 8 caracteres.</p>
+          </div>
+          <div class="form-row">
+            <div class="fg">
+              <label>Teléfono</label>
+              <input type="tel" name="telefono" placeholder="10 dígitos">
+            </div>
+            <div class="fg">
+              <label>Ocupación</label>
+              <select name="ocupacion">
+                <option value="">— Opcional —</option>
+                <option value="Estudiante">Estudiante</option>
+                <option value="Docente">Docente</option>
+                <option value="Personal médico">Personal médico</option>
+                <option value="Administrativo">Administrativo</option>
+                <option value="Empresario">Empresario</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn-auth" id="btnRegistro">Crear mi cuenta de donante ♡</button>
+        </form>
+        <div class="auth-divider">¿Ya tienes cuenta?</div>
+        <p style="text-align:center;font-size:0.85rem;color:#64748b;">
+          <button class="link-tab" onclick="switchAuthTab('login')">Inicia sesión aquí</button>
+        </p>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="auth-panel" id="panelLogin">
+        <h2 class="form-title">Bienvenido de vuelta</h2>
+        <p class="form-subtitle">Inicia sesión para ver tus donaciones y continuar apoyando.</p>
+
+        <div id="login-error" class="error-msg"></div>
+
+        <form id="loginDonanteForm">
+          <div class="fg">
+            <label>Correo Electrónico *</label>
+            <input type="email" name="correo" required placeholder="tu@correo.com">
+          </div>
+          <div class="fg">
+            <label>Contraseña *</label>
+            <input type="password" name="password" required placeholder="Tu contraseña">
+          </div>
+          <button type="submit" class="btn-auth" id="btnLogin">Iniciar sesión →</button>
+        </form>
+        <div class="auth-divider">¿Eres nuevo?</div>
+        <p style="text-align:center;font-size:0.85rem;color:#64748b;">
+          <button class="link-tab" onclick="switchAuthTab('registro')">Crea tu cuenta gratis</button>
+        </p>
+        <p style="text-align:center;margin-top:14px;">
+          <a href="login.html" style="font-size:0.78rem;color:#94a3b8;text-decoration:none;">Acceso exclusivo para administradores →</a>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="latir-session.js"></script>
+  <script>
+    function switchAuthTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+      document.getElementById('panel' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+    }
+
+    // Leer query param para pre-seleccionar tab
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab') === 'login') switchAuthTab('login');
+
+    // ── REGISTRO ──
+    document.getElementById('registroForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnRegistro');
+      const errEl = document.getElementById('reg-error');
+      const okEl  = document.getElementById('reg-success');
+      errEl.style.display = 'none';
+      okEl.style.display  = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Creando cuenta...';
+
+      const fd = new FormData(e.target);
+      const data = Object.fromEntries(fd.entries());
+      // Combinar nombre y apellido
+      data.nombre = (data.nombre + ' ' + data.apellido).trim();
+      delete data.apellido;
+
+      try {
+        const res = await fetch('http://localhost:3000/donantes/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (res.ok && result.success) {
+          // Guardar sesión
+          LATIR_SESSION.guardar('donante', result.donante);
+          okEl.textContent = '✅ ¡Cuenta creada! Redirigiendo...';
+          okEl.style.display = 'block';
+          setTimeout(() => redirigirTrasAuth(), 1200);
+        } else {
+          errEl.textContent = '❌ ' + (result.error || 'Error al registrar.');
+          errEl.style.display = 'block';
+        }
+      } catch (err) {
+        errEl.textContent = '❌ No se pudo conectar al servidor. ¿Está corriendo?';
+        errEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Crear mi cuenta de donante ♡';
+      }
+    });
+
+    // ── LOGIN ──
+    document.getElementById('loginDonanteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnLogin');
+      const errEl = document.getElementById('login-error');
+      errEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Verificando...';
+
+      const data = Object.fromEntries(new FormData(e.target).entries());
+
+      try {
+        const res = await fetch('http://localhost:3000/donantes/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (res.ok && result.success) {
+          LATIR_SESSION.guardar('donante', result.donante);
+          redirigirTrasAuth();
+        } else {
+          errEl.textContent = '❌ ' + (result.error || 'Credenciales incorrectas.');
+          errEl.style.display = 'block';
+        }
+      } catch (err) {
+        errEl.textContent = '❌ Error de conexión al servidor.';
+        errEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Iniciar sesión →';
+      }
+    });
+
+    function redirigirTrasAuth() {
+      // Si venía de intentar donar, volver al portal (el modal se abrirá automáticamente)
+      const redirect = sessionStorage.getItem('latir_redirect_donacion') || localStorage.getItem('latir_redirect_donacion');
+      if (redirect) {
+        window.location.href = 'Interfaz latir.html';
+      } else {
+        window.location.href = 'dashboard-donante.html';
+      }
+    }
+  </script>
+</body>
+</html>
