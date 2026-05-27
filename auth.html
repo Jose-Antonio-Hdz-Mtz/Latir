@@ -511,7 +511,7 @@
       let endpoint = '';
       
       if (registerRole === 'donante') {
-        endpoint = 'http://localhost:3000/donantes/register';
+        endpoint = '/donantes/register';
         data = {
           nombre: (rawData.nombre + ' ' + rawData.apellido).trim(),
           correo: rawData.correo,
@@ -520,7 +520,7 @@
           ocupacion: rawData.ocupacion
         };
       } else {
-        endpoint = 'http://localhost:3000/pacientes/register';
+        endpoint = '/pacientes/register';
         data = {
           nombre: rawData.nombreCompleto.trim(),
           correo: rawData.correo,
@@ -604,11 +604,11 @@
 
       let endpoint = '';
       if (loginRole === 'donante') {
-        endpoint = 'http://localhost:3000/donantes/login';
+        endpoint = '/donantes/login';
       } else if (loginRole === 'paciente') {
-        endpoint = 'http://localhost:3000/pacientes/login';
+        endpoint = '/pacientes/login';
       } else {
-        endpoint = 'http://localhost:3000/login';
+        endpoint = '/login';
       }
 
       try {

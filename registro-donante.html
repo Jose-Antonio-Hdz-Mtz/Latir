@@ -322,7 +322,7 @@
       delete data.apellido;
 
       try {
-        const res = await fetch('http://localhost:3000/donantes/register', {
+        const res = await fetch('/donantes/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
@@ -359,7 +359,7 @@
       const data = Object.fromEntries(new FormData(e.target).entries());
 
       try {
-        const res = await fetch('http://localhost:3000/donantes/login', {
+        const res = await fetch('/donantes/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)

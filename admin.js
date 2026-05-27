@@ -98,7 +98,7 @@ function sanitizeTransferencia(t) {
 // Cargar listas del dashboard (Pacientes)
 async function loadDashboard() {
     try {
-        const res = await fetch('http://localhost:3000/admin/pacientes');
+        const res = await fetch('/admin/pacientes');
         if(!res.ok) throw new Error("Falla cargando datos");
         let pacientes = await res.json();
         pacientes = pacientes.map(sanitizePatient);
@@ -173,7 +173,7 @@ async function loadTransferencias() {
     list.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando transferencias...</td></tr>';
 
     try {
-        const res = await fetch('http://localhost:3000/admin/transferencias');
+        const res = await fetch('/admin/transferencias');
         let data = await res.json();
         data = data.map(sanitizeTransferencia);
         list.innerHTML = '';
@@ -211,7 +211,7 @@ window.validarTransferencia = async (id, estado) => {
     if(!confirm(confirmMsg)) return;
 
     try {
-        const res = await fetch(`http://localhost:3000/admin/transferencias/${id}`, {
+        const res = await fetch(`/admin/transferencias/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ estado })
@@ -245,7 +245,7 @@ window.openEvaluar = async (id, nombre) => {
     document.getElementById('modal-evaluar').classList.add('open');
 
     try {
-        const res = await fetch(`http://localhost:3000/admin/pacientes/${id}`);
+        const res = await fetch(`/admin/pacientes/${id}`);
         if (!res.ok) throw new Error('No se pudo cargar el paciente');
         let p = await res.json();
         p = sanitizePatient(p);
@@ -268,7 +268,7 @@ window.openEvaluar = async (id, nombre) => {
         const archivoEl = document.getElementById('md-archivo');
         if(archivoEl) {
             if(p.archivoCaso) {
-                archivoEl.innerHTML = `<a href="http://localhost:3000/uploads/${p.archivoCaso}" target="_blank" style="color:var(--terracota); text-decoration:underline;">📄 Ver evidencia adjunta</a>`;
+                archivoEl.innerHTML = `<a href="/uploads/${p.archivoCaso}" target="_blank" style="color:var(--terracota); text-decoration:underline;">📄 Ver evidencia adjunta</a>`;
             } else {
                 archivoEl.textContent = 'Sin archivo adjunto';
             }
@@ -285,7 +285,7 @@ window.openEvaluar = async (id, nombre) => {
         const tutorIneEl = document.getElementById('md-tutor-ine');
         if (tutorIneEl) {
             if (p.archivoIne) {
-                tutorIneEl.innerHTML = `<a href="http://localhost:3000/uploads/${p.archivoIne}" target="_blank" style="color:var(--terracota); text-decoration:underline;">📄 Ver INE adjunto</a>`;
+                tutorIneEl.innerHTML = `<a href="/uploads/${p.archivoIne}" target="_blank" style="color:var(--terracota); text-decoration:underline;">📄 Ver INE adjunto</a>`;
             } else {
                 tutorIneEl.textContent = 'Sin archivo adjunto';
             }
@@ -395,7 +395,7 @@ document.getElementById('evaluarForm')?.addEventListener('submit', async (e) => 
     btn.disabled = true; btn.textContent = "Aprobando...";
 
     try {
-        const res = await fetch(`http://localhost:3000/admin/pacientes/${id}/aprobar`, {
+        const res = await fetch(`/admin/pacientes/${id}/aprobar`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -419,7 +419,7 @@ window.rechazarCaso = async () => {
     
     const id = document.getElementById('evaluar-id').value;
     try {
-        const res = await fetch(`http://localhost:3000/admin/pacientes/${id}/rechazar`, { method: 'PUT' });
+        const res = await fetch(`/admin/pacientes/${id}/rechazar`, { method: 'PUT' });
         if(res.ok) {
             closeModal();
             loadDashboard();
@@ -445,7 +445,7 @@ document.getElementById('adminForm')?.addEventListener('submit', async (e) => {
     btn.disabled = true; btn.textContent = 'Guardando en BD...';
 
     try {
-        const res = await fetch('http://localhost:3000/pacientes', {
+        const res = await fetch('/pacientes', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -478,7 +478,7 @@ window.verDatosCompletos = async (id) => {
     modal.classList.add('open');
 
     try {
-        const res = await fetch(`http://localhost:3000/admin/pacientes/${id}`);
+        const res = await fetch(`/admin/pacientes/${id}`);
         if (!res.ok) throw new Error('no encontrado');
         let p = await res.json();
         p = sanitizePatient(p);
@@ -490,11 +490,11 @@ window.verDatosCompletos = async (id) => {
             : '';
 
         const evidenciaHtml = p.archivoCaso 
-            ? `<div class="dato-campo"><span class="dato-label">Evidencia adjunta</span><span class="dato-val"><a href="http://localhost:3000/uploads/${p.archivoCaso}" target="_blank" style="color:var(--terracota); text-decoration:underline;">Ver archivo (Foto/PDF)</a></span></div>`
+            ? `<div class="dato-campo"><span class="dato-label">Evidencia adjunta</span><span class="dato-val"><a href="/uploads/${p.archivoCaso}" target="_blank" style="color:var(--terracota); text-decoration:underline;">Ver archivo (Foto/PDF)</a></span></div>`
             : '';
 
         const ineHtml = p.archivoIne 
-            ? `<div class="dato-campo"><span class="dato-label">INE del Tutor</span><span class="dato-val"><a href="http://localhost:3000/uploads/${p.archivoIne}" target="_blank" style="color:var(--terracota); text-decoration:underline;">Ver INE (Foto/PDF)</a></span></div>`
+            ? `<div class="dato-campo"><span class="dato-label">INE del Tutor</span><span class="dato-val"><a href="/uploads/${p.archivoIne}" target="_blank" style="color:var(--terracota); text-decoration:underline;">Ver INE (Foto/PDF)</a></span></div>`
             : '';
 
         body.innerHTML = `
@@ -567,7 +567,7 @@ window.cerrarDatosCompletos = () => {
 
 async function loadFondoGeneral() {
     try {
-        const res = await fetch('http://localhost:3000/admin/fondo-general');
+        const res = await fetch('/admin/fondo-general');
         if (!res.ok) throw new Error("Falla cargando fondo general");
         const data = await res.json();
         
@@ -624,7 +624,7 @@ async function loadFondoGeneral() {
         }
 
         // Cargar pacientes para el dropdown
-        const pRes = await fetch('http://localhost:3000/pacientes');
+        const pRes = await fetch('/pacientes');
         if (!pRes.ok) throw new Error("Falla cargando pacientes");
         let pacientes = await pRes.json();
         pacientes = pacientes.map(sanitizePatient);
@@ -662,7 +662,7 @@ document.getElementById('distribuirForm')?.addEventListener('submit', async (e) 
     btn.disabled = true; btn.textContent = 'Distribuyendo fondos...';
 
     try {
-        const res = await fetch('http://localhost:3000/admin/fondo-general/distribuir', {
+        const res = await fetch('/admin/fondo-general/distribuir', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ pacienteId, monto })
@@ -703,7 +703,7 @@ async function loadEvidencias() {
     list.innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando comprobantes...</td></tr>';
 
     try {
-        const res = await fetch('http://localhost:3000/admin/evidencias');
+        const res = await fetch('/admin/evidencias');
         let data = await res.json();
         data = data.map(ev => {
             const cleanEv = { ...ev };
@@ -729,7 +729,7 @@ async function loadEvidencias() {
                 <td>${e.Descripcion}</td>
                 <td><b style="color:var(--terracota)">$${Number(e.MontoComprobado).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</b></td>
                 <td>
-                  <a href="http://localhost:3000/uploads/${e.RutaArchivo}" target="_blank" class="action-btn" style="border-color:var(--gold);color:var(--gold);text-decoration:none;display:inline-block;margin-top:2px;">
+                  <a href="/uploads/${e.RutaArchivo}" target="_blank" class="action-btn" style="border-color:var(--gold);color:var(--gold);text-decoration:none;display:inline-block;margin-top:2px;">
                     📄 Ver Comprobante
                   </a>
                 </td>
@@ -754,7 +754,7 @@ window.validarEvidencia = async (id, estado) => {
     if(!confirm(confirmMsg)) return;
 
     try {
-        const res = await fetch(`http://localhost:3000/admin/evidencias/${id}/estado`, {
+        const res = await fetch(`/admin/evidencias/${id}/estado`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ estado })

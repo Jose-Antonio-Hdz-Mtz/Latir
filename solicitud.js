@@ -57,7 +57,7 @@
     const formData = new FormData(e.target);
 
     try {
-      const res = await fetch('http://localhost:3000/solicitar', {
+      const res = await fetch('/solicitar', {
         method: 'POST',
         body: formData
       });

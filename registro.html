@@ -150,7 +150,7 @@
         const data = Object.fromEntries(new FormData(e.target).entries());
 
         try {
-            const res = await fetch('http://localhost:3000/solicitar', {
+            const res = await fetch('/solicitar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)

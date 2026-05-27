@@ -187,7 +187,7 @@ function igTexto(ig) {
 // ===== CARGAR PACIENTES DESDE EL BACKEND =====
 async function cargarPacientes() {
   try {
-    const res = await fetch('http://localhost:3000/pacientes');
+    const res = await fetch('/pacientes');
     if (!res.ok) throw new Error("Error en servidor");
     
     const data = await res.json();
@@ -482,7 +482,7 @@ function abrirDetallePaciente(pac) {
     if (galeria) {
       galeria.innerHTML = `<p style="font-size:0.82rem; color:var(--text-muted); margin:0; text-align:center;">Cargando comprobantes...</p>`;
       
-      fetch(`http://localhost:3000/pacientes/${pac.id}/evidencias`)
+      fetch(`/pacientes/${pac.id}/evidencias`)
         .then(res => res.json())
         .then(data => {
           galeria.innerHTML = "";
@@ -499,7 +499,7 @@ function abrirDetallePaciente(pac) {
               if (isPdf) {
                 previewHtml = `<span style="font-size: 1.5rem; margin-right: 8px;">📄</span>`;
               } else {
-                previewHtml = `<img src="http://localhost:3000/uploads/${ev.RutaArchivo}" style="width:50px; height:50px; object-fit:cover; border-radius:6px; margin-right:8px;" alt="Comprobante" />`;
+                previewHtml = `<img src="/uploads/${ev.RutaArchivo}" style="width:50px; height:50px; object-fit:cover; border-radius:6px; margin-right:8px;" alt="Comprobante" />`;
               }
 
               galeria.innerHTML += `
@@ -509,7 +509,7 @@ function abrirDetallePaciente(pac) {
                     <p style="font-size:0.82rem; font-weight:700; color:var(--brown-dark); margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${sanitizeText(ev.Descripcion)}</p>
                     <p style="font-size:0.75rem; color:var(--text-muted); margin:0;">${ev.Fecha} · <b style="color:var(--terracota); font-weight:700;">$${Number(ev.MontoComprobado).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</b></p>
                   </div>
-                  <a href="http://localhost:3000/uploads/${ev.RutaArchivo}" target="_blank" style="font-size:0.75rem; color:var(--terracota); text-decoration:underline; margin-left:10px; flex-shrink:0;">
+                  <a href="/uploads/${ev.RutaArchivo}" target="_blank" style="font-size:0.75rem; color:var(--terracota); text-decoration:underline; margin-left:10px; flex-shrink:0;">
                     Ver Archivo
                   </a>
                 </div>
@@ -826,7 +826,7 @@ if($("#btnConfirm")) {
                 donanteId:  state.donanteId,   // ⭐ vincular con cuenta registrada
             };
 
-            const response = await fetch('http://localhost:3000/donar', {
+            const response = await fetch('/donar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(bodyData)
@@ -946,7 +946,7 @@ cargarEstadisticas();
 
 async function cargarEstadisticas() {
   try {
-    const res = await fetch('http://localhost:3000/estadisticas');
+    const res = await fetch('/estadisticas');
     if (!res.ok) throw new Error("Error obteniendo estadisticas");
     const data = await res.json();
     if (!data.success) return;

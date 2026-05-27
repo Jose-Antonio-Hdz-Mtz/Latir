@@ -242,7 +242,7 @@
     async function cargarDonaciones() {
       const cont = document.getElementById('donacionesContainer');
       try {
-        const res = await fetch(`http://localhost:3000/donantes/${donante.id}/donaciones`);
+        const res = await fetch(`/donantes/${donante.id}/donaciones`);
         if (!res.ok) throw new Error();
         const data = await res.json();
 

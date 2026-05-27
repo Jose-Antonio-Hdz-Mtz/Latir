@@ -131,7 +131,7 @@
             
             try {
                 // Consultar estado en tiempo real en el backend
-                const res = await fetch(`http://localhost:3000/pacientes/estado/${localPac.id}`);
+                const res = await fetch(`/pacientes/estado/${localPac.id}`);
                 const data = await res.json();
                 
                 if (data.success) {
@@ -194,7 +194,7 @@
 
         async function cargarEvidencias() {
             try {
-                const res = await fetch(`http://localhost:3000/pacientes/${pacienteSesion.id}/evidencias`);
+                const res = await fetch(`/pacientes/${pacienteSesion.id}/evidencias`);
                 const data = await res.json();
                 const tbody = document.getElementById('tablaEvidencias');
                 tbody.innerHTML = '';
@@ -211,7 +211,7 @@
                         <td>${e.Descripcion}</td>
                         <td>${formatMoney(e.MontoComprobado)}</td>
                         <td><span class="badge badge-${e.Estado}">${e.Estado}</span></td>
-                        <td><a href="http://localhost:3000/uploads/${e.RutaArchivo}" target="_blank">Ver</a></td>
+                        <td><a href="/uploads/${e.RutaArchivo}" target="_blank">Ver</a></td>
                     `;
                     tbody.appendChild(tr);
                 });
@@ -235,7 +235,7 @@
             formData.append('archivoEvidencia', archivoInput.files[0]);
 
             try {
-                const res = await fetch('http://localhost:3000/pacientes/evidencia', {
+                const res = await fetch('/pacientes/evidencia', {
                     method: 'POST',
                     body: formData
                 });
@@ -281,7 +281,7 @@
             btn.textContent = "Guardando...";
 
             try {
-                const res = await fetch(`http://localhost:3000/pacientes/${pacienteSesion.id}/clabe`, {
+                const res = await fetch(`/pacientes/${pacienteSesion.id}/clabe`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ clabe })
