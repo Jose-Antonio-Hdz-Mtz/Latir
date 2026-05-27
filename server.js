@@ -23,6 +23,11 @@ app.use(express.json());
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// Redirigir o servir la página principal por defecto
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Interfaz latir.html'));
+});
+
 // =====================================================================
 // Conexión a PostgreSQL
 // =====================================================================
