@@ -364,7 +364,9 @@ app.put('/admin/pacientes/:id/rechazar', async (req, res) => {
 app.get('/admin/transferencias', async (req, res) => {
     try {
         const result = await pool.query(`
-            SELECT donacionid, monto, nombre_donante, correo_donante, ocupacion_donante,
+            SELECT donacionid as "DonacionID", monto as "Monto", 
+                   nombre_donante as "NombreDonante", correo_donante as "CorreoDonante", 
+                   ocupacion_donante as "OcupacionDonante",
                    TO_CHAR(fecha_donacion, 'DD/MM/YYYY') as "Fecha"
             FROM donacion WHERE estado_transferencia = 'Pendiente'
         `);
@@ -525,7 +527,8 @@ app.get('/donantes/:id/donaciones', async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT
-                D.donacionid, D.monto, D.metodo_pago, D.es_recurrente,
+                D.donacionid as "DonacionID", D.monto as "Monto", 
+                D.metodo_pago as "MetodoPago", D.es_recurrente as "EsRecurrente",
                 TO_CHAR(D.fecha_donacion, 'DD/MM/YYYY') as "fechaDonacion",
                 P.pacienteid as "pacienteId", P.nombre as "pacienteNombre",
                 P.diagnostico, P.estado as "estadoPaciente",
@@ -691,8 +694,9 @@ app.get('/pacientes/:id/evidencias', async (req, res) => {
     const { id } = req.params;
     try {
         const result = await pool.query(`
-            SELECT evidenciaid, ruta_archivo, descripcion, monto_comprobado, estado,
-                   TO_CHAR(fecha_subida, 'DD/MM/YYYY') as "Fecha"
+            SELECT evidenciaid as "EvidenciaID", ruta_archivo as "RutaArchivo", 
+                   descripcion as "Descripcion", monto_comprobado as "MontoComprobado", 
+                   estado as "Estado", TO_CHAR(fecha_subida, 'DD/MM/YYYY') as "Fecha"
             FROM evidencia_gasto
             WHERE pacienteid = $1
             ORDER BY fecha_subida DESC
@@ -711,8 +715,9 @@ app.get('/pacientes/:id/evidencias', async (req, res) => {
 app.get('/admin/evidencias', async (req, res) => {
     try {
         const result = await pool.query(`
-            SELECT E.evidenciaid, E.pacienteid, E.ruta_archivo, E.descripcion,
-                   E.monto_comprobado, E.estado,
+            SELECT E.evidenciaid as "EvidenciaID", E.pacienteid as "PacienteID", 
+                   E.ruta_archivo as "RutaArchivo", E.descripcion as "Descripcion",
+                   E.monto_comprobado as "MontoComprobado", E.estado as "Estado",
                    TO_CHAR(E.fecha_subida, 'DD/MM/YYYY') as "Fecha",
                    P.nombre as "PacienteNombre"
             FROM evidencia_gasto E
@@ -760,7 +765,9 @@ app.get('/admin/fondo-general', async (req, res) => {
         const balance = recibido - distribuido;
 
         const donacionesGeneralResult = await pool.query(`
-            SELECT donacionid, monto, nombre_donante, correo_donante, estado_transferencia,
+            SELECT donacionid as "DonacionID", monto as "Monto", 
+                   nombre_donante as "NombreDonante", correo_donante as "CorreoDonante", 
+                   estado_transferencia as "EstadoTransferencia",
                    TO_CHAR(fecha_donacion, 'DD/MM/YYYY') as "Fecha"
             FROM donacion
             WHERE pacienteid IS NULL
@@ -768,7 +775,7 @@ app.get('/admin/fondo-general', async (req, res) => {
         `);
 
         const distribucionesResult = await pool.query(`
-            SELECT D.donacionid, D.monto, P.nombre as "PacienteNombre",
+            SELECT D.donacionid as "DonacionID", D.monto as "Monto", P.nombre as "PacienteNombre",
                    TO_CHAR(D.fecha_donacion, 'DD/MM/YYYY') as "Fecha"
             FROM donacion D
             JOIN paciente P ON D.pacienteid = P.pacienteid
